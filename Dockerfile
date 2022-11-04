@@ -5,7 +5,7 @@ RUN apt-get install build-essential cmake libbluetooth-dev libsdl2-dev \
   libjpeg-dev libogg-dev libopenal-dev libpng-dev \
   libssl-dev libvorbis-dev libmbedtls-dev pkg-config zlib1g-dev git sqlite3 subversion -y
 RUN apt install -y python3-pip
-RUN pip install pyenet
+RUN pip install pyenet psycopg2-binary
 RUN apt install -y curl vim unzip jq
 COPY udp-flood.py /udp-flood.py
 RUN chmod +x /udp-flood.py

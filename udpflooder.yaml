@@ -1,0 +1,45 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: udpflooder
+  name: udpflooder
+  namespace: default
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: udpflooder
+  strategy:
+    rollingUpdate:
+      maxSurge: 100%
+      maxUnavailable: 100%
+    type: RollingUpdate
+  template:
+    metadata:
+      labels:
+        app: udpflooder
+    spec:
+      containers:
+        - name: udpflooder
+          envFrom:
+            - secretRef:
+                name: db-creds
+          env:
+            - name: UDP_SOCKET_PORT
+              value: "40505"
+            - name: UDP_SOCKET_IP
+              value: "35.87.65.103"
+            - name: UDP_FLOOD_PACKET_SIZE
+              value: "3"
+            - name: NUM_OF_FLOOD_THREADS
+              value: "10"
+            - name: SLEEP_BETWEEN_FLOOD
+              value: "5"
+            - name: UDP_PORT_MIN
+              value: "1024"
+            - name: UDP_PORT_MAX
+              value: "65534"
+          image: 441218111557.dkr.ecr.us-west-2.amazonaws.com/udpflooder:aarch64
+          imagePullPolicy: Always
+          command: ["/udp-flood.py"]
