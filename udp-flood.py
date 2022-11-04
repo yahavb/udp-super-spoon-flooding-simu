@@ -8,8 +8,6 @@ import enet
 import time
 import psycopg2
 
-udp_socket_port=int(os.environ.get('UDP_SOCKET_PORT'))
-udp_socket_ip=os.environ.get('UDP_SOCKET_IP')
 udp_flood_packet_size=int(os.environ.get('UDP_FLOOD_PACKET_SIZE'))
 num_of_flood_threads=int(os.environ.get('NUM_OF_FLOOD_THREADS'))
 sleep_between_flood=int(os.environ.get('SLEEP_BETWEEN_FLOOD'))

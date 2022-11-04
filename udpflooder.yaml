@@ -26,10 +26,6 @@ spec:
             - secretRef:
                 name: db-creds
           env:
-            - name: UDP_SOCKET_PORT
-              value: "40505"
-            - name: UDP_SOCKET_IP
-              value: "35.87.65.103"
             - name: UDP_FLOOD_PACKET_SIZE
               value: "3"
             - name: NUM_OF_FLOOD_THREADS
