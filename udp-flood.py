@@ -7,6 +7,7 @@ import os
 import enet
 import time
 import psycopg2
+from datetime import datetime as dt
 
 udp_flood_packet_size=int(os.environ.get('UDP_FLOOD_PACKET_SIZE'))
 num_of_flood_threads=int(os.environ.get('NUM_OF_FLOOD_THREADS'))
@@ -20,7 +21,6 @@ database=os.environ['PGUSER']
 
 
 def db_read(sql,param):
-  print("in db_read",flush=True)
   try:
     connection = psycopg2.connect(user=user,
       password=password,
@@ -38,6 +38,25 @@ def db_read(sql,param):
     if connection:
         cursor.close()
         connection.close()
+
+def db_write(sql,param):
+  try:
+    connection = psycopg2.connect(user=user,
+      password=password,
+      host=host,
+      port="5432",
+      database=database)
+    cursor = connection.cursor()
+    cursor.execute(sql,param)
+    connection.commit()
+    count = cursor.rowcount
+  except (Exception, psycopg2.Error) as error:
+    print("Failed to insert/update", error)
+    sys.stdout.flush()
+  finally:
+    if connection:
+      cursor.close()
+      connection.close()
 
 def check_udp_endpoint(udp_socket_ip,udp_socket_port):
   _udp_socket_ip=udp_socket_ip.encode('utf-8')
@@ -74,9 +93,13 @@ def scan_endpoints():
   rows = list(db_read(sql,params))
   for ipv4 in rows:
     for port in range(port_range_min,port_range_max):
-      print("{0}:{1} is {2}".format(ipv4[0],port,check_udp_endpoint(ipv4[0],port)),flush=True)
-      time.sleep(sleep_between_flood)
-      #TODO - add healthy endpoints to db table 
+      status=check_udp_endpoint(ipv4[0],port)
+      print("{0}:{1} is {2}".format(ipv4[0],port,status),flush=True)
+      if status=="true":
+        sql = """insert into target_endpoint(created_at,ip,port) values (%s,%s,%s)"""
+        params=[dt.now(),ipv4[0],port]
+        db_write(sql,params)
+        time.sleep(sleep_between_flood)
 
 scan_endpoints()
 #endpoint_status=check_udp_endpoint(udp_socket_ip,udp_socket_port)
