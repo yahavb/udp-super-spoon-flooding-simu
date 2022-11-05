@@ -2,14 +2,14 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   labels:
-    app: udpflooder
-  name: udpflooder
+    app: scanendpoints
+  name: scanendpoints
   namespace: default
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: udpflooder
+      app: scanendpoints
   strategy:
     rollingUpdate:
       maxSurge: 100%
@@ -18,10 +18,10 @@ spec:
   template:
     metadata:
       labels:
-        app: udpflooder
+        app: scanendpoints
     spec:
       containers:
-        - name: udpflooder
+        - name: scanendpoints
           envFrom:
             - secretRef:
                 name: db-creds
@@ -38,4 +38,4 @@ spec:
               value: "65534"
           image: 441218111557.dkr.ecr.us-west-2.amazonaws.com/udpflooder:aarch64
           imagePullPolicy: Always
-          command: ["/udp-flood.py"]
+          command: ["/scanendpoints.py"]
