@@ -86,7 +86,8 @@ def flood_endpoint(udp_socket_ip,udp_socket_port):
     time.sleep(sleep_between_flood)
 
 def scan_endpoints():
-  sql = """select ipv4 from ipv4_usw;"""
+  print("scan_endpoints")
+  sql = """select ip from ipv4_baseline;"""
   params = []
   rows = list(db_read(sql,params))
   for ipv4 in rows:
@@ -99,6 +100,12 @@ def scan_endpoints():
         db_write(sql,params)
         time.sleep(sleep_between_flood)
 
+def update_baseline():
+  print("update_baseline")
+  sql = """insert into ipv4_baseline(created_at,ip) select now(), ip from (select distinct split_part(endpoint,':',1) ip from servers) as t where t.ip not in (select ip from ipv4_baseline);"""
+  params=[]
+  db_write(sql,params)
+
 def flood_endpoints():
   sql = """select ip,port from target_endpoint;"""
   params = []
@@ -107,5 +114,5 @@ def flood_endpoints():
     status=check_udp_endpoint(ipv4[0],port) 
     if status=="true":
       for y in range(num_of_flood_threads):
-      _thread=threading.Thread(target=flood_endpoint(ipv4[0],port))
-      _thread.start()
+        _thread=threading.Thread(target=flood_endpoint(ipv4[0],port))
+        _thread.start()

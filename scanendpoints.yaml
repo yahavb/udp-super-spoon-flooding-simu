@@ -33,7 +33,7 @@ spec:
             - name: SLEEP_BETWEEN_FLOOD
               value: "5"
             - name: UDP_PORT_MIN
-              value: "1024"
+              value: "32768" #https://docs.aws.amazon.com/vpc/latest/userguide/vpc-network-acls.html
             - name: UDP_PORT_MAX
               value: "65534"
           image: 441218111557.dkr.ecr.us-west-2.amazonaws.com/udpflooder:aarch64

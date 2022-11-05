@@ -1,0 +1,78 @@
+insert into ipv4_baseline(created_at,ip) select now(), ip from (select distinct split_part(endpoint,':',1) ip from servers) as t where t.ip not in (select ip from ipv4_baseline);
+
+
+CREATE SEQUENCE ipv4_baseline_id_seq START 1;
+
+create table ipv4_baseline(
+  id bigint DEFAULT nextval('public.ipv4_baseline_id_seq'::regclass) not null,
+  created_at timestamp with time zone NOT NULL,
+  ip varchar(24),
+  PRIMARY KEY (id,created_at)
+) PARTITION BY RANGE (created_at);
+
+create unique index ip_idx on ipv4_baseline(ip,created_at);
+
+SELECT partman.create_parent( p_parent_table =>'public.ipv4_baseline',
+ p_control =>'created_at',
+ p_type =>'native',
+ p_interval =>'monthly',
+ p_start_partition =>'2022-11-04',
+ p_premake =>6);
+
+CREATE EXTENSION pg_cron;
+
+UPDATE partman.part_config 
+SET infinite_time_partitions = true,
+    retention = '3 years', 
+    retention_keep_table=true 
+WHERE parent_table = 'public.ipv4_baseline';
+SELECT cron.schedule('@hourly', $$CALL partman.run_maintenance_proc()$$);
+
+
+
+CREATE SEQUENCE target_id_seq START 1;
+
+create table target_endpoint(
+  id bigint DEFAULT nextval('public. target_id_seq'::regclass) not null,
+  created_at timestamp with time zone NOT NULL,
+  ip varchar(24),
+  port varchar(24),
+  PRIMARY KEY (id,created_at)
+) PARTITION BY RANGE (created_at);
+
+SELECT partman.create_parent( p_parent_table =>'public.target_endpoint',
+ p_control =>'created_at',
+ p_type =>'native',
+ p_interval =>'daily',
+ p_start_partition =>'2022-11-04',
+ p_premake =>6);
+
+UPDATE partman.part_config 
+SET infinite_time_partitions = true,
+    retention = '3 years', 
+    retention_keep_table=true 
+WHERE parent_table = 'public.target_endpoint';
+SELECT cron.schedule('@hourly', $$CALL partman.run_maintenance_proc()$$);
+
+
+CREATE EXTENSION pg_cron;
+UPDATE partman.part_config 
+SET infinite_time_partitions = true,
+    retention = '3 years', 
+    retention_keep_table=true 
+WHERE parent_table = 'public.servers';
+SELECT cron.schedule('@hourly', $$CALL partman.run_maintenance_proc()$$);
+
+UPDATE partman.part_config 
+SET infinite_time_partitions = true,
+    retention = '3 years', 
+    retention_keep_table=true 
+WHERE parent_table = 'public.server_sessions';
+SELECT cron.schedule('@hourly', $$CALL partman.run_maintenance_proc()$$);
+
+UPDATE partman.part_config 
+SET infinite_time_partitions = true,
+    retention = '3 years', 
+    retention_keep_table=true 
+WHERE parent_table = 'public.sessions';
+SELECT cron.schedule('@hourly', $$CALL partman.run_maintenance_proc()$$);
